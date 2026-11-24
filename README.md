@@ -1,88 +1,97 @@
-# Sistem Kehilangan & Temuan Barang di Lingkungan Kampus
-### Tugas Pertemuan 7: Routing, Controller & Blade Template Engine (Laravel 13 MVC)
+# UJIAN TENGAH SEMESTER (UTS) - PEMROGRAMAN BERORIENTASI OBJEK (TI033015)
+### Sistem Kehilangan & Temuan Barang di Lingkungan Kampus (Laravel 13 Session CRUD)
 
-Proyek ini adalah implementasi lanjutan dari model OOP Pertemuan 5 (**Sistem Kehilangan dan Temuan Barang di Lingkungan Kampus**) yang dipindahkan dan diintegrasikan secara penuh ke dalam arsitektur **Laravel MVC** (Model-View-Controller) dengan template engine **Blade**.
-
----
-
-## Identitas Mahasiswa & Akademik
-- **Nama Mahasiswa**: Julian Atha Maulana
-- **NIM**: 20251020052
-- **Kelas / Prodi**: TI - S1 / Teknik Informatika
-- **Mata Kuliah**: Pemrograman Berorientasi Objek (TI033015)
-- **Dosen Pengampu**: Hilman Lesmana, S.T., M.S.F.
-- **Institusi**: Fakultas Teknologi Informasi, Universitas Catur Insan Cendekia (UCIC)
-- **Tahun Akademik**: 2026/2027
+Proyek ini dibuat untuk memenuhi tugas **Ujian Tengah Semester (UTS) Ganjil Tahun Akademik 2026/2027** pada mata kuliah **Pemrograman Berorientasi Objek (TI033015)** di **Universitas Catur Insan Cendekia (UCIC)**.
 
 ---
 
-## 1. Alur Arsitektur Route, Controller, dan Blade
-Pada pertemuan sebelumnya (Pertemuan 5), seluruh class OOP digabung dalam satu file PHP murni dan hasilnya hanya dicetak ke terminal (CLI). Pada Pertemuan 7 ini, kode program dipecah secara sistematis mengikuti standar arsitektur MVC Laravel:
+## Identitas Mahasiswa & Ujian
+- **Nama Mahasiswa** : Julian Atha Maulana
+- **NIM**            : 20251020052
+- **Kelas**          : TI 2
+- **Program Studi**  : S1 Teknik Informatika
+- **Fakultas**       : Fakultas Teknologi Informasi
+- **Perguruan Tinggi**: Universitas Catur Insan Cendekia (UCIC)
+- **Mata Kuliah**    : Pemrograman Berorientasi Objek (TI033015)
+- **Dosen Pengampu** : Hilman Lesmana, S.T., M.S.F.
+- **Hari, Tanggal**  : Selasa, 24 November 2026
 
-```mermaid
-flowchart LR
-    A[Browser / User] -->|GET /laporan atau /laporan/id| B[routes/web.php]
-    B -->|Dispatch Request| C[LaporanController]
-    C -->|Instansiasi & Olah Data| D[OOP Models app/Models]
-    D -->|Return Data Objek| C
-    C -->|return view compact| E[Blade Views]
-    E -->|Render HTML Responsive| A
+---
+
+## Ringkasan Proyek & Ketentuan Pengerjaan
+Sesuai instruksi soal UTS:
+1. **Framework & Lingkungan**: Menggunakan **Laravel 13** dan **PHP 8.3** (lingkungan Laragon praktikum kelas).
+2. **Penyimpanan Session**: Mengatur `SESSION_DRIVER=file` pada file `.env`. Seluruh data barang dikelola pada file session di `storage/framework/sessions/` tanpa koneksi database.
+3. **Pola Arsitektur**: Mengimplementasikan pola ketat **Route &rarr; Controller &rarr; Blade**. Seluruh proses dipisahkan berdasarkan method Controller (tidak menumpuk di route closure atau Controller inline).
+4. **Keamanan & Standar Form**: Menggunakan **Named Routes** secara konsisten, proteksi CSRF form dengan `@csrf`, serta HTTP method spoofing `@method('PUT')` dan `@method('DELETE')`.
+5. **UI & UX**: Menggunakan Blade Template Engine dengan layout utama `app.blade.php`, alert feedback notifikasi, pencarian barang, ringkasan statistik, serta konfirmasi sebelum menghapus data.
+
+---
+
+## Soal No. 1 - Pemetaan 7 Route RESTful (`routes/web.php`)
+
+Seluruh route didefinisikan secara rapi di `routes/web.php`. Route statis `/barang/create` didefinisikan **sebelum** route dinamis `/barang/{kode}` untuk mencegah konflik penangkapan parameter URL.
+
+| No | HTTP Method | URI | Nama Route (Named Route) | Method Controller | Keterangan |
+|---|---|---|---|---|---|
+| 1 | `GET` | `/barang` | `barang.index` | `index()` | Menampilkan seluruh daftar barang dari session |
+| 2 | `GET` | `/barang/create` | `barang.create` | `create()` | Menampilkan form penambahan barang baru |
+| 3 | `POST` | `/barang` | `barang.store` | `store()` | Menerima data form & menyimpan ke session |
+| 4 | `GET` | `/barang/{kode}` | `barang.show` | `show($kode)` | Menampilkan detail lengkap satu barang |
+| 5 | `GET` | `/barang/{kode}/edit` | `barang.edit` | `edit($kode)` | Menampilkan form edit data barang |
+| 6 | `PUT/PATCH` | `/barang/{kode}` | `barang.update` | `update($kode)` | Memperbarui data barang pada session |
+| 7 | `DELETE` | `/barang/{kode}` | `barang.destroy` | `destroy($kode)` | Menghapus barang dari session |
+
+### Bukti Eksekusi Route List (`php artisan route:list`)
+```
+GET|HEAD   barang ............ barang.index › BarangController@index
+POST       barang ............ barang.store › BarangController@store
+GET|HEAD   barang/create ..... barang.create › BarangController@create
+GET|HEAD   barang/{kode} ..... barang.show › BarangController@show
+PUT|PATCH  barang/{kode} ..... barang.update › BarangController@update
+DELETE     barang/{kode} ..... barang.destroy › BarangController@destroy
+GET|HEAD   barang/{kode}/edit  barang.edit › BarangController@edit
 ```
 
-1. **Bagian Model (`app/Models/`)**:
-   - Class-class dari Pertemuan 5 dipisahkan menjadi file model mandiri di `app/Models/`:
-     - `BisaDicocokkan.php`: Interface kontrak kemampuan pencocokan teks (`kunciPencocokan()`).
-     - `Barang.php`: Komponen objek fisik barang yang dilaporkan hilang atau ditemukan.
-     - `Laporan.php`: Abstract class sebagai kerangka bersama semua laporan (mengelola status, atribut dasar, dan method `ringkas()`).
-     - `LaporanKehilangan.php`: Subclass yang mewarisi `Laporan` (Inheritance *is-a*), menambahkan identitas `namaPelapor`.
-     - `LaporanTemuan.php`: Subclass yang mewarisi `Laporan` dan meng-override method `masaBerlaku()` menjadi 90 hari.
-     - `Klaim.php`: Class relasi komposisi (*has-a*) yang menghubungkan laporan kehilangan dan temuan, serta memverifikasi kecocokan barang menggunakan interface `BisaDicocokkan`.
-   - Method disesuaikan agar mengembalikan nilai (*return values*) sehingga dapat dirender dinamis di template Blade.
+---
 
-2. **Bagian Route (`routes/web.php`)**:
-   - Seluruh endpoint URL didaftarkan secara terstruktur menggunakan *Named Routes*:
-     - Route praktikum: `/laporan` (daftar semua laporan).
-     - Route praktikum dengan parameter wajib: `/laporan/{id}` (melihat detail satu laporan).
-     - Route tugas rumah dengan parameter opsional: `/klaim/{status?}` (simulasi dan filter hasil klaim barang).
+## Soal No. 2 - Logika Controller (`app/Http/Controllers/BarangController.php`)
 
-3. **Bagian Controller (`app/Http/Controllers/LaporanController.php`)**:
-   - Bertindak sebagai pengatur alur lalu lintas data (*traffic manager*).
-   - Menyiapkan instansiasi objek OOP secara in-memory (karena materi database dipelajari setelah UTS sesuai RPS).
-   - Menangkap parameter dari URL (baik wajib `{id}` maupun opsional `{status?}`).
-   - Memilih view Blade yang sesuai dan mengirimkan data melalui array / `compact()`.
-
-4. **Bagian View Blade (`resources/views/`)**:
-   - `layouts/app.blade.php`: Kerangka master layout dengan navigasi responsif, header identitas UCIC, subheader mahasiswa, `@yield('content')`, dan footer.
-   - `laporan/index.blade.php`: Halaman tabel daftar laporan memanfaatkan directive `@foreach`, badge status dengan directive `@if`, dan link detail.
-   - `laporan/show.blade.php`: Halaman kartu detail satu objek laporan berdasarkan parameter URL `{id}`.
-   - `laporan/klaim.blade.php`: Halaman simulasi pencocokan klaim barang dengan tombol filter status (`semua`, `cocok`, `ditolak`, `selesai`) memanfaatkan directive `@forelse` / `@empty`.
+Controller menangani seluruh alur aplikasi secara terpisah dan modular:
+1. `index()`: Mengambil array barang dari `session('data_barang')`. Jika session masih kosong, sistem otomatis menginisialisasi 5 data awal mock (*default sample*). Mendukung fitur pencarian keyword `?q=...` dan menghitung statistik.
+2. `create()`: Menyiapkan usulan kode barang otomatis (`suggestedKode`) dan daftar opsi kategori serta kondisi fisik untuk dikirim ke Blade form.
+3. `store(Request $request)`: Melakukan validasi input form (wajib, tipe data, unik kode). Jika lolos validasi, membentuk array barang dan menyimpannya ke session, kemudian melakukan redirect ke `barang.index` disertai pesan flash `success`.
+4. `show($kode)`: Mencari data barang pada session berdasarkan `$kode`. Jika kode tidak ditemukan, melakukan redirect ke `barang.index` dengan pesan flash `error`. Jika ditemukan, menampilkan halaman detail barang.
+5. `edit($kode)`: Mencari barang dan mengembalikan form edit yang telah terisi data lama (*pre-filled value*).
+6. `update(Request $request, $kode)`: Memvalidasi data masukan pembaruan, memperbarui data barang di session, dan redirect kembali ke daftar barang dengan flash message `success`.
+7. `destroy($kode)`: Menghapus elemen barang dari array session dengan `unset($dataBarang[$kode])`, menyimpan perubahan ke file storage session, lalu redirect dengan konfirmasi status sukses.
 
 ---
 
-## 2. Tabel Pemetaan Route
+## Soal No. 3 - Desain & Implementasi Blade Template
 
-| HTTP Method | URI / Path | Route Name | Controller Action | Kategori | Fungsi Halaman |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/` | - | Closure (Redirect) | Navigasi | Mengarahkan halaman awal otomatis ke `/laporan`. |
-| `GET` | `/laporan` | `laporan.index` | `LaporanController@index` | Praktikum | Menampilkan tabel seluruh laporan kehilangan dan temuan (Polymorphism). |
-| `GET` | `/laporan/{id}` | `laporan.show` | `LaporanController@show` | Praktikum | Menampilkan detail spesifik satu laporan sesuai parameter wajib `{id}`. |
-| `GET` | `/klaim/{status?}` | `laporan.klaim` | `LaporanController@klaim` | Tugas Rumah | Menampilkan simulasi klaim barang dan memfilter berdasarkan parameter opsional `{status?}`. |
+Semua tampilan halaman mewarisi satu layout induk yang konsisten:
+1. **Layout Utama (`resources/views/layouts/app.blade.php`)**:
+   - Area header navigasi dengan menu interaktif dan indikator badge UTS.
+   - Subheader identitas mahasiswa (Julian Atha Maulana - 20251020052).
+   - Area notifikasi global untuk menangkap session flash: `@if(session('success'))`, `@if(session('error'))`, dan `@if(session('info'))`.
+   - Area konten dinamis dengan `@yield('content')`.
+   - Footer resmi akademik Universitas Catur Insan Cendekia.
+2. **Daftar Barang (`resources/views/barang/index.blade.php`)**:
+   - Menampilkan minimal 7 kolom wajib: **Kode, Nama Barang, Kategori, Lokasi, Jumlah, Kondisi, dan Aksi**.
+   - Dilengkapi kartu statistik (Total Barang, Hilang, Ditemukan, Diklaim).
+   - Tombol Aksi: **Detail**, **Edit**, dan form **Hapus** dengan dialog konfirmasi JavaScript `onsubmit="return confirm(...)"`.
+   - Menggunakan direktif `@extends`, `@section`, `@foreach`, `@if`, `@csrf`, dan `@method('DELETE')`.
+3. **Form Tambah (`resources/views/barang/create.blade.php`)**:
+   - Formulir input lengkap dengan proteksi CSRF (`@csrf`), pesan validasi error `@error`, dan tombol kembali.
+4. **Form Edit (`resources/views/barang/edit.blade.php`)**:
+   - Formulir ubah data dengan simulasi method PUT (`@method('PUT')`), nilai lama pre-filled melalui `old('...', $barang['...'])`, dan kode barang yang dikunci sebagai identitas unik.
+5. **Detail Barang (`resources/views/barang/show.blade.php`)**:
+   - Kartu profil barang menampilkan seluruh atribut lengkap, badge status, identitas pelapor, serta navigasi cepat ke Edit dan Hapus.
 
 ---
 
-## 3. Pemenuhan Poin Praktikum & Tugas Rumah Individu (Slide 26)
-
-| Syarat Tugas | Status | Keterangan Penerapan di Kode |
-| :--- | :---: | :--- |
-| **Tambahkan satu halaman** | **Terpenuhi** | Dibuat halaman `resources/views/laporan/klaim.blade.php` untuk simulasi klaim barang. |
-| **Buat minimal satu route berparameter** | **Terpenuhi** | Dibuat route wajib `/laporan/{id}` dan route opsional `/klaim/{status?}` di `routes/web.php`. |
-| **Gunakan Controller menyiapkan data** | **Terpenuhi** | `LaporanController.php` menginisialisasi objek `Barang`, `LaporanKehilangan`, `LaporanTemuan`, dan `Klaim`. |
-| **Gunakan Blade `@if` dan `@foreach`** | **Terpenuhi** | Digunakan `@foreach` pada baris tabel laporan, `@forelse` pada kartu klaim, serta `@if` pada badge status. |
-| **README & Dokumentasi Lengkap** | **Terpenuhi** | File `README.md` merinci arsitektur, kode, pengujian, dan bukti eksekusi. |
-
----
-
-## 4. Cara Menjalankan Aplikasi
+## Langkah Menjalankan Aplikasi di Komputer Lokal
 
 1. **Clone Repositori**:
    ```bash
@@ -90,44 +99,56 @@ flowchart LR
    cd tugas-pbo-pertemuan-7
    ```
 
-2. **Instal Dependensi**:
+2. **Salin File Environment**:
+   ```bash
+   cp .env.example .env
+   ```
+   Pastikan pengaturan session pada file `.env`:
+   ```env
+   SESSION_DRIVER=file
+   ```
+
+3. **Install Dependensi Composer** (jika belum ada folder vendor):
    ```bash
    composer install
    ```
 
-3. **Konfigurasi Environment**:
-   Salin `.env.example` menjadi `.env` dan generate key:
+4. **Generate Application Key**:
    ```bash
-   cp .env.example .env
    php artisan key:generate
    ```
 
-4. **Jalankan Server Lokal**:
+5. **Jalankan Development Server**:
    ```bash
    php artisan serve
    ```
-   Aplikasi dapat diakses melalui browser pada: `http://127.0.0.1:8000/laporan`
+   Buka browser dan akses URL: **`http://127.0.0.1:8000/barang`** atau **`http://127.0.0.1:8000`**.
 
 ---
 
-## 5. Skenario Pengujian & Bukti Eksekusi
+## Struktur Direktori Utama
+```
+pbo-laravel/
+├── app/
+│   ├── Http/
+│   │   └── Controllers/
+│   │       ├── BarangController.php   # Controller Utama CRUD Session (UTS)
+│   │       └── LaporanController.php  # Controller OOP Laporan (Pertemuan 7)
+│   └── Models/                        # Domain OOP Model Capstone Project
+├── resources/
+│   └── views/
+│       ├── layouts/
+│       │   └── app.blade.php          # Master Layout Blade Konsisten
+│       └── barang/
+│           ├── index.blade.php        # Halaman Tabel Daftar Barang (Read)
+│           ├── create.blade.php       # Halaman Form Tambah Barang (Create)
+│           ├── edit.blade.php         # Halaman Form Edit Barang (Update)
+│           └── show.blade.php         # Halaman Detail Barang (Show)
+├── routes/
+│   └── web.php                        # Definisi 7 Route RESTful Wajib
+└── screenshots/                       # Bukti Pengujian & Screenshot Aplikasi
+```
 
-1. **Pemeriksaan Route via Terminal (`php artisan route:list`)**:
-   ```text
-   GET|HEAD  / ................. routes/web.php
-   GET|HEAD  klaim/{status?} ... laporan.klaim › LaporanController@klaim
-   GET|HEAD  laporan ........... laporan.index › LaporanController@index
-   GET|HEAD  laporan/{id} ...... laporan.show › LaporanController@show
-   ```
+---
 
-2. **Pengujian Halaman Daftar (`http://127.0.0.1:8000/laporan`)**:
-   - Menampilkan total 6 laporan (3 Kehilangan, 3 Temuan).
-   - Menampilkan perbedaan masa simpan: `LaporanKehilangan` (30 hari default) vs `LaporanTemuan` (90 hari hasil override).
-
-3. **Pengujian Halaman Detail (`http://127.0.0.1:8000/laporan/LK-001`)**:
-   - Menangkap parameter `LK-001`.
-   - Menampilkan komponen `Barang` (Dompet hitam), ciri-ciri, pelapor (Budi Santoso), dan output polimorfik `ringkas()`.
-
-4. **Pengujian Halaman Tugas Rumah (`http://127.0.0.1:8000/klaim/cocok`)**:
-   - Menangkap parameter opsional `cocok`.
-   - Hanya menampilkan transaksi klaim yang statusnya cocok (`KL-001`), membuktikan loose coupling melalui interface `BisaDicocokkan`.
+&copy; 2026 **Julian Atha Maulana** (20251020052) &bull; Teknik Informatika S1 &bull; **Universitas Catur Insan Cendekia**
