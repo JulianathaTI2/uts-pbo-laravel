@@ -95,8 +95,8 @@ Semua tampilan halaman mewarisi satu layout induk yang konsisten:
 
 1. **Clone Repositori**:
    ```bash
-   git clone https://github.com/JulianathaTI2/tugas-pbo-pertemuan-7.git
-   cd tugas-pbo-pertemuan-7
+   git clone https://github.com/JulianathaTI2/uts-pbo-laravel.git
+   cd uts-pbo-laravel
    ```
 
 2. **Salin File Environment**:
