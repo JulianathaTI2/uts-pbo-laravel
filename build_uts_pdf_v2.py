@@ -12,7 +12,7 @@ def get_base64_image(path):
     return f"data:image/{ext};base64,{base64.b64encode(data).decode('utf-8')}"
 
 img_dir = r"C:\laragon\www\pbo-laravel\screenshots"
-logo_b64 = get_base64_image(os.path.join(img_dir, "ucic_logo.jpeg"))
+logo_b64 = get_base64_image(os.path.join(img_dir, "ucic_logo_clean.png"))
 r_list_b64 = get_base64_image(os.path.join(img_dir, "uts_route_list.png"))
 c1_b64 = get_base64_image(os.path.join(img_dir, "uts_crud_1_index.png"))
 c2_b64 = get_base64_image(os.path.join(img_dir, "uts_crud_2_create.png"))
@@ -952,7 +952,7 @@ SESSION_ENCRYPT=false</div>
             <li>Seluruh <strong>7 route RESTful</strong> telah terkonfigurasi dengan tepat menggunakan <em>named routes</em> yang seragam, dan penempatan route statis <code>/barang/create</code> sebelum route dinamis <code>/barang/{{kode}}</code> terbukti sukses mencegah konflik penangkapan parameter URL.</li>
             <li>Mekanisme penyimpanan data berbasis berkas sesi lokal (<strong>SESSION_DRIVER=file</strong>) yang tersimpan di direktori <code>storage/framework/sessions/</code> terbukti andal dalam melayani seluruh operasi CRUD tanpa memerlukan koneksi database SQL.</li>
             <li>Antarmuka aplikasi yang dibangun dengan template engine Blade dan Tailwind CSS menyajikan layout yang konsisten, aman melalui proteksi <code>@csrf</code> dan <code>@method</code>, serta informatif melalui kehadiran notifikasi flash message dan dialog konfirmasi penghapusan data.</li>
-            <li>Seluruh berkas proyek aplikasi telah dipublikasikan secara bersih pada repositori GitHub khusus UTS yang terpisah dari repositori tugas mingguan lainnya.</li>
+            <li>Seluruh berkas proyek aplikasi telah dipublikasikan secara bersih pada repositori GitHub khusus UTS (<a href="https://github.com/JulianathaTI2/uts-pbo-laravel" target="_blank" style="color: #1d4ed8; text-decoration: underline; font-weight: bold;">https://github.com/JulianathaTI2/uts-pbo-laravel</a>) yang terpisah dari repositori tugas mingguan lainnya.</li>
         </ol>
 
         <div class="sub-bab">6.2 Saran</div>
@@ -980,7 +980,7 @@ SESSION_ENCRYPT=false</div>
         </div>
 
         <div style="font-size: 11pt; line-height: 1.5; padding-left: 1.25cm; text-indent: -1.25cm; text-align: justify; margin-bottom: 12px;">
-            Otwell, T. (2026). <em>Laravel Documentation: Routing, Controllers, Session, and Blade Templates (Release 13.x)</em>. Diakses dari https://laravel.com/docs.
+            Otwell, T. (2026). <em>Laravel Documentation: Routing, Controllers, Session, and Blade Templates (Release 13.x)</em>. Diakses dari <a href="https://laravel.com/docs" target="_blank" style="color: #1d4ed8; text-decoration: underline;">https://laravel.com/docs</a>.
         </div>
 
         <div style="font-size: 11pt; line-height: 1.5; padding-left: 1.25cm; text-indent: -1.25cm; text-align: justify; margin-bottom: 12px;">
@@ -1010,7 +1010,8 @@ SESSION_ENCRYPT=false</div>
             Sesuai ketentuan pengerjaan UTS bahwa repositori UTS dipisahkan dari tugas pertemuan lainnya, seluruh kode program, konfigurasi, tampilan Blade, dan pengujian telah dipublikasikan pada repositori GitHub resmi berikut:
         </p>
         <div class="code-snippet" style="font-size: 9.5pt; font-weight: bold; color: #1e3a8a;">
-Repository URL : https://github.com/JulianathaTI2/uts-pbo-laravel.git
+Repository Web : <a href="https://github.com/JulianathaTI2/uts-pbo-laravel" target="_blank" style="color: #1d4ed8; text-decoration: underline; font-weight: bold;">https://github.com/JulianathaTI2/uts-pbo-laravel</a>
+Git Clone URL  : <a href="https://github.com/JulianathaTI2/uts-pbo-laravel.git" target="_blank" style="color: #1d4ed8; text-decoration: underline; font-weight: bold;">https://github.com/JulianathaTI2/uts-pbo-laravel.git</a>
 Cabang Aktif   : main
 Nama Mahasiswa : Julian Atha Maulana
 NIM            : 20251020052
